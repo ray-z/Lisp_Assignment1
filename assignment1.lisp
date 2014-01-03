@@ -78,9 +78,35 @@
                                          (cdr old-list)))))
     (poly+ p1 (reverse-poly '() p2))))
                          
-                                
+(defun poly* (p1 p2)
+  (labels ((multiply-terms (new-term old-term)
+                           (if (equal old-term '())
+                             new-term
+                             (if (equal (car new-term) (car old-term))
+                               (let ((new-head (list (car new-term)
+                                                     (+ (cadr new-term) (cadr old-term)))))
+                                 (multiply-terms (append new-head (cddr new-term))
+                                                 (cddr old-term)))
+                               (multiply-terms (append new-term
+                                                       (list (car old-term) (cadr old-term)))
+                                               (cddr old-term)))))
+           (multiply-list (l1 l2)
+                          (if (equal l1 '())
+                            l2
+                            (multiply-list (cddr l1)
+                                           (multiply-terms (list (car l1) (cadr l1)) l2)))))
+    (cons (* (car p1) (car p2))
+          (multiply-list (cdr p1) (cdr p2)))))
+             
 
-(print (poly- '((1 x 1) (1 y+1 1) (5 z 1)) '((-2 y 1) (1 z 1))))
+
+
+                           
+                           
+
+                                
+(print (poly* '(4 X 1 Y 4 Z 2) '(5 Y 1 Z -1)))
+;;;(print (poly- '((1 x 1) (1 y+1 1) (5 z 1)) '((-2 y 1) (1 z 1))))
 
                       ;;;(if (equal (cdr item1) (cdr item2))
                         ;;;(list (cons (+ (car item1) (car item2)) (cdr item1)))
