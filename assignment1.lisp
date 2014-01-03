@@ -79,64 +79,51 @@
     (poly+ p1 (reverse-poly '() p2))))
                          
 (defun poly* (p1 p2)
-  (labels ((multiply-terms (new-term old-term)
-                           (if (equal old-term '())
-                             new-term
-                             (if (equal (car new-term) (car old-term))
-                               (let ((new-head (list (car new-term)
-                                                     (+ (cadr new-term) (cadr old-term)))))
-                                 (multiply-terms (append new-head (cddr new-term))
-                                                 (cddr old-term)))
-                               (multiply-terms (append new-term
-                                                       (list (car old-term) (cadr old-term)))
-                                               (cddr old-term)))))
-           (multiply-list (l1 l2)
-                          (if (equal l1 '())
-                            l2
-                            (multiply-list (cddr l1)
-                                           (multiply-terms (list (car l1) (cadr l1)) l2)))))
-    (cons (* (car p1) (car p2))
-          (multiply-list (cdr p1) (cdr p2)))))
-             
+  "Return a polynomial = p1 * p1.
+  'letter' is a list contains letter and exponent, eg. (X 2),
+  'term' is letters append together, eg. (X 1 Y 2).
+  'list' is a list of terms, eg. ((X 1 Y 2) (Z 3 X 1))).
+  "
+  (labels ((letter*term (letter term result)
+                        "Return a new term = letter * term.
+                        Multiply all letters in term by letter."
+                        (if (equal term '())
+                          (append letter result)
+                          (if (equal (car letter) (car term))
+                            (append (list (car term)
+                                          (+ (cadr letter) (cadr term)))
+                                    (cddr term)
+                                    result)
+                            (letter*term letter
+                                         (cddr term)
+                                         (append (list (car term) (cadr term)) result)))))
+           (term*term (term1 term2)
+                      "Return a new term = term1 * term2.
+                      Multiply all letters in term2 bt term1"
+                      (if (equal term1 '())
+                        term2
+                        (term*term (cddr term1)
+                                   (letter*term (list (car term1) (cadr term1))
+                                                term2
+                                                '()))))
+           (term*list (term l result)
+                      "Return a new list = term * l.
+                      Multiply all terms in l by the term.
+                      "
+                      (if (equal l '())
+                        result
+                        (let ((new-term (cons (* (car term) (caar l))
+                                             (term*term (cdr term) (cdar l)))))
+                          (term*list term
+                                     (cdr l)
+                                              (cons new-term result)))))
+           (list*list (l1 l2 result)
+                      "Return a new list = l1 * l2.
+                      Add the results of each term in l1 multipy l2."
+                      (if (equal l1 '())
+                        result
+                        (list*list (cdr l1)
+                                   l2
+                                   (poly+ result (term*list (car l1) l2 '()))))))
+    (list*list p1 p2 '())))
 
-
-
-                           
-                           
-
-                                
-(print (poly* '(4 X 1 Y 4 Z 2) '(5 Y 1 Z -1)))
-;;;(print (poly- '((1 x 1) (1 y+1 1) (5 z 1)) '((-2 y 1) (1 z 1))))
-
-                      ;;;(if (equal (cdr item1) (cdr item2))
-                        ;;;(list (cons (+ (car item1) (car item2)) (cdr item1)))
-                        ;;;(list item1 item2)))
-                       
-  
- ;;; (labels ((add-item (item l)
- ;;;                    (if (= 0 (length l))
- ;;;                      (cons item l)
- ;;;                      (if (equal (cdr item) (cdar l))
- ;;;                        (cons (cons (+ (car item) (caar l)) (cdar l)) (cdr l))
- ;;;                        (add-item item (cdr l)))))
- ;;;          (simplify-list (old-list new-list)
- ;;;                         (if (= 0 (length old-list))
- ;;;                           new-list
- ;;;                           (simplify-list (cdr old-list) new-list))))
- ;;;   (let ((p (append p1 p2))
- ;;;         (result ()))
- ;;;     (simplify-list p (add-item (car p) result))))) 
-        
- 
- ;;; (if (= 0 (length p1))
- ;;;   p2
- ;;;   (labels ((add (item)
- ;;;                 (if (equal (cdar p1) (cdr item))
- ;;;                   ;;;(poly+ (cdr p1) (+ (caar p1) (car item)))
- ;;;                   ;;;(poly+ (cdr p1) (cons (car p1) p2)))))
- ;;;            (map 'list #'add p2))))
-
-           
-
-
-;;;(print (poly+ '((1 x 1) (1 y 1)) '((-2 y 1) (1 z 1))))
