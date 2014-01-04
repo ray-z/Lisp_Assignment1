@@ -6,7 +6,7 @@
  | Author: Lei Zeng - LZ474
  |
  |
- | Inputs' format:
+ | Polynomial format: 
  | ________________
  |
  |  1) Representation of terms in polynomial:
@@ -16,8 +16,8 @@
  |      Example: 
  |          X^2 --> (1 X 2) 
  |          3XY^2Z --> (3 X 1 Y 2 Z 1)
- |      Warining: 
- |          Put a simplyfied terms:
+ |      Warning: 
+ |          Put a simplified term:
  |              XX^2 should rather be X^3
  |              X^(1+2) should rather be X^3
  |
